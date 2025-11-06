@@ -1,26 +1,130 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserProfileDto } from './dto/create-user_profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user_profile.dto';
+import { Gender } from '../common/enums';
+import { PrismaService } from '../prisma/prisma.service';
+import { UserProfile } from '@prisma/client';
 
 @Injectable()
 export class UserProfilesService {
-  create(createUserProfileDto: CreateUserProfileDto) {
-    return 'This action adds a new userProfile';
+
+  constructor(
+    private readonly prismaService: PrismaService
+  ) { }
+
+  async create(createUserProfileDto: CreateUserProfileDto, userId: number): Promise<UserProfile> {
+    const { gender } = createUserProfileDto;
+    if (gender) {
+      const existGender = gender.toLowerCase();
+      if (existGender != Gender.male && existGender != Gender.female && existGender != Gender.other) {
+        throw new BadRequestException("Iltimos jinsni togri kiriting ❗️");
+      }
+    }
+
+    const newProfile = await this.prismaService.userProfile.create({
+      data: {
+        user_id: userId,
+        ...createUserProfileDto,
+        birth_date: createUserProfileDto.birth_date ? new Date(createUserProfileDto.birth_date) : undefined,
+      }
+    });
+    return newProfile;
   }
 
-  findAll() {
-    return `This action returns all userProfiles`;
+  async findAll(): Promise<UserProfile[]> {
+    const profiles = await this.prismaService.userProfile.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            full_name: true,
+            phone: true,
+            is_active: true,
+            role: true
+          }
+        }
+      }
+    });
+    return profiles;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userProfile`;
+  async findOne(id: number): Promise<UserProfile> {
+    const user = await this.prismaService.userProfile.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            full_name: true,
+            phone: true,
+            is_active: true,
+            role: true
+          }
+        }
+      }
+    });
+
+    if (!user) throw new NotFoundException("Bunday profil topilmadi ❌");
+
+    return user;
   }
 
-  update(id: number, updateUserProfileDto: UpdateUserProfileDto) {
-    return `This action updates a #${id} userProfile`;
+  async update(id: number, updateUserProfileDto: UpdateUserProfileDto): Promise<UserProfile> {
+    const { gender, birth_date } = updateUserProfileDto;
+
+    const user = await this.prismaService.userProfile.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException("Bunday profil topilmadi ❌");
+
+    if (gender) {
+      const existGender = gender.toLowerCase();
+      if (
+        existGender != Gender.male &&
+        existGender != Gender.female &&
+        existGender != Gender.other
+      ) {
+        throw new BadRequestException("Iltimos jinsni tog'ri kiriting ❗️");
+      }
+    }
+
+    let birth;
+    if (birth_date) {
+      birth = new Date(birth_date);
+    }
+
+    const updatedProfile = await this.prismaService.userProfile.update({
+      where: { id },
+      data: {
+        ...updateUserProfileDto,
+        birth_date: birth
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            full_name: true,
+            phone: true,
+            role: true,
+            is_active: true
+          }
+        }
+      }
+    });
+
+    return updatedProfile;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} userProfile`;
+  async remove(id: number): Promise<{ message: string }> {
+    const profile = await this.prismaService.userProfile.findUnique({
+      where: { id }
+    });
+    if (!profile) throw new NotFoundException("Bunday profil topilmadi ❌");
+
+    await this.prismaService.userProfile.delete({
+      where: { id }
+    });
+
+    return {
+      message: "Profile muvaffaqiyatli o'chirildi 🗑️✅"
+    };
   }
 }
