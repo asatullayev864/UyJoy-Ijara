@@ -1,11 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 
 async function start() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn']
   });
+
+  app.use(cookieParser());
+  app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
     .setTitle('🏡 Uy-Joy Ijarasi API')
@@ -31,7 +35,7 @@ async function start() {
   });
 
   await app.listen(process.env.PORT ?? 3000);
-  console.log(`🚀 Server running on: http://localhost:${process.env.PORT ?? 3000}`);
+  console.log(`🚀 Server running on: http://localhost:${process.env.PORT ?? 3000}/api`);
   console.log(`📄 Swagger docs: http://localhost:${process.env.PORT ?? 3000}/api/docs`);
 }
 start();

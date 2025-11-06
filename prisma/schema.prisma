@@ -6,3 +6,206 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ================= ENUMS =================
+
+enum UserRole {
+  superadmin
+  admin
+  owner
+  client
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum BookingStatus {
+  requested
+  accepted
+  declined
+  completed
+}
+
+enum PaymentStatus {
+  paid
+  canceled
+  pending
+}
+
+enum ReportStatus {
+  pending
+  reviewed
+  resolved
+}
+
+enum HouseStatus {
+  pending
+  approved
+  rejected
+}
+
+// ================= MODELS =================
+
+model User {
+  id         Int          @id @default(autoincrement())
+  full_name  String
+  phone      String       @unique
+  email      String       @unique
+  password   String
+  role       UserRole     @default(client)   // <--- qo‘shildi
+  refresh_token  String? 
+  is_active  Boolean      @default(true)
+  created_at DateTime     @default(now())
+
+  profile    UserProfile[]
+  houses     House[]      @relation("UserHouses")
+  bookings   Booking[]    @relation("UserBookings")
+  favorites  Favorite[]
+  reviews    Review[]
+  reports    Report[]     @relation("UserReports")
+
+  @@map("users")
+}
+
+model UserProfile {
+  id          Int      @id @default(autoincrement())
+  user_id     Int      
+  user        User     @relation(fields: [user_id], references: [id])
+  birth_date  DateTime?
+  gender      Gender?
+  avatar_url  String?
+  address     String?
+  is_verified Boolean   @default(false)
+
+  @@map("user_profiles")
+}
+
+model House {
+  id          Int           @id @default(autoincrement())
+  owner_id    Int
+  owner       User          @relation("UserHouses", fields: [owner_id], references: [id])
+  title       String
+  description String
+  address     String
+  city        String
+  status      HouseStatus    @default(pending)
+  created_at  DateTime       @default(now())
+
+  details     HouseDetails?
+  images      HouseImage[]
+  facilities  HouseFacility[]
+  bookings    Booking[]
+  favorites   Favorite[]
+  reviews     Review[]
+  reports     Report[]
+
+  @@map("houses")
+}
+
+model HouseDetails {
+  id              Int      @id @default(autoincrement())
+  house_id        Int      @unique
+  house           House    @relation(fields: [house_id], references: [id])
+  rooms_count     Int
+  bathrooms_count Int
+  area            Int
+  floor           Int?
+  has_parking     Boolean  @default(false)
+
+  @@map("house_details")
+}
+
+model HouseImage {
+  id        Int    @id @default(autoincrement())
+  house_id  Int
+  house     House  @relation(fields: [house_id], references: [id])
+  image_url String
+
+  @@map("house_images")
+}
+
+model HouseFacility {
+  id         Int    @id @default(autoincrement())
+  house_id   Int
+  house      House  @relation(fields: [house_id], references: [id])
+  conditions String
+
+  @@map("house_facilities")
+}
+
+model RentalTime {
+  id        Int     @id @default(autoincrement())
+  rent_time String
+  price     Int
+
+  bookings  Booking[]
+
+  @@map("rental_times")
+}
+
+model Booking {
+  id            Int           @id @default(autoincrement())
+  house_id      Int
+  client_id     Int
+  rental_time_id Int
+  house         House         @relation(fields: [house_id], references: [id])
+  client        User          @relation("UserBookings", fields: [client_id], references: [id])
+  rental_time   RentalTime    @relation(fields: [rental_time_id], references: [id])
+  start_date    DateTime
+  how_many      Int
+  total_price   Decimal
+  status        BookingStatus @default(requested)
+
+  payments      Payment[]
+
+  @@map("bookings")
+}
+
+model Payment {
+  id           Int           @id @default(autoincrement())
+  booking_id   Int
+  booking      Booking       @relation(fields: [booking_id], references: [id])
+  total_amount Decimal
+  paid_amount  Decimal
+  status       PaymentStatus @default(pending)
+
+  @@map("payment")
+}
+
+model Favorite {
+  id       Int   @id @default(autoincrement())
+  user_id  Int
+  house_id Int
+  user     User  @relation(fields: [user_id], references: [id])
+  house    House @relation(fields: [house_id], references: [id])
+
+  @@map("favorites")
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  house_id   Int
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id])
+  house      House    @relation(fields: [house_id], references: [id])
+
+  @@map("reviews")
+}
+
+model Report {
+  id          Int          @id @default(autoincrement())
+  house_id    Int
+  reporter_id Int
+  reason      String
+  status      ReportStatus @default(pending)
+  house       House        @relation(fields: [house_id], references: [id])
+  reporter    User         @relation("UserReports", fields: [reporter_id], references: [id])
+
+  @@map("reports")
+}
