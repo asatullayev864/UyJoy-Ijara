@@ -9,6 +9,7 @@ import { HouseDetailsModule } from './house_details/house_details.module';
 import { HouseImagesModule } from './house_images/house_images.module';
 import { HouseFacilitiesModule } from './house_facilities/house_facilities.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { FavoritesModule } from './favorites/favorites.module';
     HouseDetailsModule,
     HouseImagesModule,
     HouseFacilitiesModule,
-    FavoritesModule
+    FavoritesModule,
+    ReviewsModule
   ],
   controllers: [],
   providers: [],
