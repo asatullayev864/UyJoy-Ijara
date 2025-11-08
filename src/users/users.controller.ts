@@ -1,7 +1,11 @@
-import { Controller, Get, Body, Patch, Param, Delete } from "@nestjs/common";
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from "@nestjs/swagger";
+import { AccessTokenGuard, JwtRoleGuard, SelfGuard } from "../common/guards";
+import { Roles } from "../common/decorators";
+import { UsersRole } from "../common/enums";
+import { SelfRoleGuard } from "../common/guards/self-role.guard";
 
 @ApiTags("Users") // Swagger menuga nom berish
 @ApiBearerAuth()
@@ -11,6 +15,8 @@ export class UsersController {
 
   @Get()
   @ApiOperation({ summary: "Barcha foydalanuvchilarni olish" })
+  @UseGuards(AccessTokenGuard, JwtRoleGuard)
+  @Roles(UsersRole.superadmin, UsersRole.admin)
   @ApiResponse({
     status: 200,
     description: "Foydalanuvchilar ro'yxati",
@@ -31,6 +37,7 @@ export class UsersController {
   }
 
   @Get(":id")
+  @UseGuards(AccessTokenGuard, SelfRoleGuard)
   @ApiOperation({ summary: "Bitta foydalanuvchini ID bo'yicha olish" })
   @ApiParam({ name: "id", type: Number, description: "Foydalanuvchi ID" })
   @ApiResponse({
@@ -52,6 +59,7 @@ export class UsersController {
   }
 
   @Patch(":id")
+  @UseGuards(AccessTokenGuard, SelfGuard)
   @ApiOperation({ summary: "Foydalanuvchini yangilash" })
   @ApiParam({ name: "id", type: Number, description: "Foydalanuvchi ID" })
   @ApiBody({ type: UpdateUserDto })
@@ -76,6 +84,7 @@ export class UsersController {
   }
 
   @Delete(":id")
+  @UseGuards(AccessTokenGuard, SelfRoleGuard)
   @ApiOperation({ summary: "Foydalanuvchini o'chirish" })
   @ApiParam({ name: "id", type: Number, description: "Foydalanuvchi ID" })
   @ApiResponse({

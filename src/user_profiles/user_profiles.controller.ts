@@ -3,8 +3,9 @@ import { CreateUserProfileDto } from './dto/create-user_profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user_profile.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { UserProfilesService } from './user_profiles.service';
-import { AccessTokenGuard, JwtAuthGuard } from '../common/guards';
+import { AccessTokenGuard, JwtAuthGuard, SelfGuard } from '../common/guards';
 import { GetCurrentUserId } from '../common/decorators';
+import { SelfRoleGuard } from '../common/guards/self-role.guard';
 
 @ApiTags('UserProfiles')
 @ApiBearerAuth()
@@ -90,7 +91,7 @@ export class UserProfilesController {
   }
 
   @Patch(':id')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, SelfGuard)
   @ApiOperation({ summary: 'Foydalanuvchi profilini yangilash' })
   @ApiParam({ name: 'id', type: Number, description: 'UserProfile ID' })
   @ApiBody({ type: UpdateUserProfileDto })
@@ -120,7 +121,7 @@ export class UserProfilesController {
   }
 
   @Delete(':id')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, SelfRoleGuard)
   @ApiOperation({ summary: "Foydalanuvchi profilini o'chirish" })
   @ApiParam({ name: "id", type: Number, description: "UserProfile ID" })
   @ApiResponse({

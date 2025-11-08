@@ -124,7 +124,7 @@ export class HouseService {
 
   async remove(id: number, userId: number) {
     const house = await this.prismaService.house.findUnique({ where: { id } });
-
+    
     if (!house) {
       throw new NotFoundException('Bunday uy topilmadi ❌');
     }
