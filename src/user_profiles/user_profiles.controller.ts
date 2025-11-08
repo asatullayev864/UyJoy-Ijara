@@ -1,18 +1,19 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { CreateUserProfileDto } from './dto/create-user_profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user_profile.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { UserProfilesService } from './user_profiles.service';
-import { RefreshTokenGuard } from '../common/guards';
+import { AccessTokenGuard, JwtAuthGuard } from '../common/guards';
 import { GetCurrentUserId } from '../common/decorators';
 
 @ApiTags('UserProfiles')
+@ApiBearerAuth()
 @Controller('user-profiles')
 export class UserProfilesController {
   constructor(private readonly userProfilesService: UserProfilesService) { }
 
   @Post()
-  @UseGuards(RefreshTokenGuard)
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ summary: 'Yangi foydalanuvchi profile yaratish' })
   @ApiBody({ type: CreateUserProfileDto })
   @ApiResponse({
@@ -41,6 +42,7 @@ export class UserProfilesController {
   }
 
   @Get()
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ summary: 'Barcha foydalanuvchi profillarini olish' })
   @ApiResponse({
     status: 200,
@@ -64,6 +66,7 @@ export class UserProfilesController {
   }
 
   @Get(':id')
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ summary: 'Bitta foydalanuvchi profilini olish' })
   @ApiParam({ name: 'id', type: Number, description: 'UserProfile ID' })
   @ApiResponse({
@@ -87,6 +90,7 @@ export class UserProfilesController {
   }
 
   @Patch(':id')
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ summary: 'Foydalanuvchi profilini yangilash' })
   @ApiParam({ name: 'id', type: Number, description: 'UserProfile ID' })
   @ApiBody({ type: UpdateUserProfileDto })
@@ -108,11 +112,15 @@ export class UserProfilesController {
       }
     }
   })
-  update(@Param('id') id: string, @Body() updateUserProfileDto: UpdateUserProfileDto) {
-    return this.userProfilesService.update(+id, updateUserProfileDto);
+  update(
+    @GetCurrentUserId() userId: number,
+    @Param('id') id: string,
+    @Body() updateUserProfileDto: UpdateUserProfileDto) {
+    return this.userProfilesService.update(+id, updateUserProfileDto, +userId);
   }
 
   @Delete(':id')
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({ summary: "Foydalanuvchi profilini o'chirish" })
   @ApiParam({ name: "id", type: Number, description: "UserProfile ID" })
   @ApiResponse({
@@ -123,7 +131,10 @@ export class UserProfilesController {
     }
   })
   @ApiResponse({ status: 404, description: "Profile topilmadi" })
-  remove(@Param("id") id: string) {
-    return this.userProfilesService.remove(+id);
+  remove(
+    @GetCurrentUserId() userId: number,
+    @Param("id") id: string
+  ) {
+    return this.userProfilesService.remove(+id, +userId);
   }
 }

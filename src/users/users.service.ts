@@ -68,13 +68,34 @@ export class UsersService implements OnModuleInit {
   }
 
   async findAll() {
-    const users = await this.prismaService.user.findMany();
+    const users = await this.prismaService.user.findMany({
+      include: {
+        profile: {
+          select: {
+            id: true,
+            birth_date: true,
+            gender: true,
+            avatar_url: true
+          }
+        }
+      }
+    });
     return users;
   };
 
   async findOne(id: number) {
     const user = await this.prismaService.user.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        profile: {
+          select: {
+            id: true,
+            birth_date: true,
+            gender: true,
+            avatar_url: true
+          }
+        }
+      }
     });
     if (!user) throw new NotFoundException("Bunday foydalanuvchi topilmadi ❌");
     return user;

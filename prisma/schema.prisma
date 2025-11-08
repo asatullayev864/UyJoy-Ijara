@@ -47,33 +47,48 @@ enum HouseStatus {
   rejected
 }
 
+enum UzbekistanRegion {
+  Tashkent
+  Samarkand
+  Bukhara
+  Khorezm
+  Fergana
+  Andijan
+  Namangan
+  Surkhandarya
+  Kashkadarya
+  Jizzakh
+  Navoi
+  Sirdarya
+}
+
 // ================= MODELS =================
 
 model User {
-  id         Int          @id @default(autoincrement())
-  full_name  String
-  phone      String       @unique
-  email      String       @unique
-  password   String
-  role       UserRole     @default(client)   // <--- qo‘shildi
-  refresh_token  String? 
-  is_active  Boolean      @default(true)
-  created_at DateTime     @default(now())
+  id            Int      @id @default(autoincrement())
+  full_name     String
+  phone         String   @unique
+  email         String   @unique
+  password      String
+  role          UserRole @default(client) // <--- qo‘shildi
+  refresh_token String?
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
 
-  profile    UserProfile[]
-  houses     House[]      @relation("UserHouses")
-  bookings   Booking[]    @relation("UserBookings")
-  favorites  Favorite[]
-  reviews    Review[]
-  reports    Report[]     @relation("UserReports")
+  profile   UserProfile[]
+  houses    House[]       @relation("UserHouses")
+  bookings  Booking[]     @relation("UserBookings")
+  favorites Favorite[]
+  reviews   Review[]
+  reports   Report[]      @relation("UserReports")
 
   @@map("users")
 }
 
 model UserProfile {
-  id          Int      @id @default(autoincrement())
-  user_id     Int      
-  user        User     @relation(fields: [user_id], references: [id])
+  id          Int       @id @default(autoincrement())
+  user_id     Int
+  user        User      @relation(fields: [user_id], references: [id])
   birth_date  DateTime?
   gender      Gender?
   avatar_url  String?
@@ -84,36 +99,36 @@ model UserProfile {
 }
 
 model House {
-  id          Int           @id @default(autoincrement())
+  id          Int              @id @default(autoincrement())
   owner_id    Int
-  owner       User          @relation("UserHouses", fields: [owner_id], references: [id])
+  owner       User             @relation("UserHouses", fields: [owner_id], references: [id])
   title       String
   description String
   address     String
-  city        String
-  status      HouseStatus    @default(pending)
-  created_at  DateTime       @default(now())
+  province    UzbekistanRegion @default(Tashkent)
+  status      HouseStatus      @default(pending)
+  created_at  DateTime         @default(now())
 
-  details     HouseDetails?
-  images      HouseImage[]
-  facilities  HouseFacility[]
-  bookings    Booking[]
-  favorites   Favorite[]
-  reviews     Review[]
-  reports     Report[]
+  details    HouseDetails?
+  images     HouseImage[]
+  facilities HouseFacility[]
+  bookings   Booking[]
+  favorites  Favorite[]
+  reviews    Review[]
+  reports    Report[]
 
   @@map("houses")
 }
 
 model HouseDetails {
-  id              Int      @id @default(autoincrement())
-  house_id        Int      @unique
-  house           House    @relation(fields: [house_id], references: [id])
+  id              Int     @id @default(autoincrement())
+  house_id        Int     @unique
+  house           House   @relation(fields: [house_id], references: [id])
   rooms_count     Int
   bathrooms_count Int
   area            Int
   floor           Int?
-  has_parking     Boolean  @default(false)
+  has_parking     Boolean @default(false)
 
   @@map("house_details")
 }
@@ -137,29 +152,29 @@ model HouseFacility {
 }
 
 model RentalTime {
-  id        Int     @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   rent_time String
   price     Int
 
-  bookings  Booking[]
+  bookings Booking[]
 
   @@map("rental_times")
 }
 
 model Booking {
-  id            Int           @id @default(autoincrement())
-  house_id      Int
-  client_id     Int
+  id             Int           @id @default(autoincrement())
+  house_id       Int
+  client_id      Int
   rental_time_id Int
-  house         House         @relation(fields: [house_id], references: [id])
-  client        User          @relation("UserBookings", fields: [client_id], references: [id])
-  rental_time   RentalTime    @relation(fields: [rental_time_id], references: [id])
-  start_date    DateTime
-  how_many      Int
-  total_price   Decimal
-  status        BookingStatus @default(requested)
+  house          House         @relation(fields: [house_id], references: [id])
+  client         User          @relation("UserBookings", fields: [client_id], references: [id])
+  rental_time    RentalTime    @relation(fields: [rental_time_id], references: [id])
+  start_date     DateTime
+  how_many       Int
+  total_price    Decimal
+  status         BookingStatus @default(requested)
 
-  payments      Payment[]
+  payments Payment[]
 
   @@map("bookings")
 }

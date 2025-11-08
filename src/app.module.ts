@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { UserProfilesModule } from './user_profiles/user_profiles.module';
+import { HouseModule } from './house/house.module';
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { UserProfilesModule } from './user_profiles/user_profiles.module';
     ConfigModule.forRoot({ envFilePath: ".env", isGlobal: true }),
     AuthModule,
     UsersModule,
-    UserProfilesModule
+    UserProfilesModule,
+    HouseModule
   ],
   controllers: [],
   providers: [],

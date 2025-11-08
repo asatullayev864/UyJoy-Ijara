@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserProfileDto } from './dto/create-user_profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user_profile.dto';
-import { Gender } from '../common/enums';
+import { Gender, UsersRole } from '../common/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserProfile } from '@prisma/client';
 
@@ -69,11 +69,14 @@ export class UserProfilesService {
     return user;
   }
 
-  async update(id: number, updateUserProfileDto: UpdateUserProfileDto): Promise<UserProfile> {
+  async update(id: number, updateUserProfileDto: UpdateUserProfileDto, userId: number): Promise<UserProfile> {
     const { gender, birth_date } = updateUserProfileDto;
 
-    const user = await this.prismaService.userProfile.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException("Bunday profil topilmadi ❌");
+    const userProfil = await this.prismaService.userProfile.findUnique({ where: { id } });
+
+    if (!userProfil) throw new NotFoundException("Bunday profil topilmadi ❌");
+
+    if (userProfil.user_id != userId) throw new BadRequestException("Faqat ozingizni profilingizni ozgartira olasiz ❗️");
 
     if (gender) {
       const existGender = gender.toLowerCase();
@@ -113,11 +116,20 @@ export class UserProfilesService {
     return updatedProfile;
   }
 
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: number, userId: number): Promise<{ message: string }> {
     const profile = await this.prismaService.userProfile.findUnique({
       where: { id }
     });
+
     if (!profile) throw new NotFoundException("Bunday profil topilmadi ❌");
+
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (user.role != UsersRole.superadmin && user.role != UsersRole.admin && profile.user_id != userId) {
+      throw new BadRequestException("Siz faqat ozingizni profilingizni o'chirishingiz mumkin ❗️");
+    }
 
     await this.prismaService.userProfile.delete({
       where: { id }
