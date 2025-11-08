@@ -8,6 +8,7 @@ import { HouseModule } from './house/house.module';
 import { HouseDetailsModule } from './house_details/house_details.module';
 import { HouseImagesModule } from './house_images/house_images.module';
 import { HouseFacilitiesModule } from './house_facilities/house_facilities.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { HouseFacilitiesModule } from './house_facilities/house_facilities.modul
     HouseModule,
     HouseDetailsModule,
     HouseImagesModule,
-    HouseFacilitiesModule
+    HouseFacilitiesModule,
+    FavoritesModule
   ],
   controllers: [],
   providers: [],
