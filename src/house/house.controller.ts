@@ -6,7 +6,6 @@ import { AccessTokenGuard, JwtRoleGuard } from '../common/guards';
 import { GetCurrentUserId, Roles } from '../common/decorators';
 import { UsersRole } from '../common/enums';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { SelfRoleGuard } from '../common/guards/self-role.guard';
 
 @ApiTags('House')
 @ApiBearerAuth()

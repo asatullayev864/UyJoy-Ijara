@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { UserProfilesModule } from './user_profiles/user_profiles.module';
 import { HouseModule } from './house/house.module';
+import { HouseDetailsModule } from './house_details/house_details.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { HouseModule } from './house/house.module';
     AuthModule,
     UsersModule,
     UserProfilesModule,
-    HouseModule
+    HouseModule,
+    HouseDetailsModule
   ],
   controllers: [],
   providers: [],
