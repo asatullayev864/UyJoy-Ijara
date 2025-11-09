@@ -14,6 +14,7 @@ import { ReportsModule } from './reports/reports.module';
 import { RentalTimesModule } from './rental_times/rental_times.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { PaymentModule } from './payment/payment.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { PaymentModule } from './payment/payment.module';
     ReportsModule,
     RentalTimesModule,
     BookingsModule,
-    PaymentModule
+    PaymentModule,
+    AnalyticsModule
   ],
   controllers: [],
   providers: [],
