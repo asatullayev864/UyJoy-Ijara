@@ -4,10 +4,3 @@ export enum PaymentStatus {
     canceled = "canceled",    // bekor qilingan
     pending = "pending"       // to‘lov kutilmoqda
 }
-
-// To‘lov usuli
-export enum PaymentMethod {
-    cash = "cash",
-    card = "card",
-    online = "online",
-}

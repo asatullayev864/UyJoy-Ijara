@@ -13,6 +13,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { ReportsModule } from './reports/reports.module';
 import { RentalTimesModule } from './rental_times/rental_times.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { BookingsModule } from './bookings/bookings.module';
     ReviewsModule,
     ReportsModule,
     RentalTimesModule,
-    BookingsModule
+    BookingsModule,
+    PaymentModule
   ],
   controllers: [],
   providers: [],

@@ -173,6 +173,7 @@ model Booking {
   client         User          @relation("UserBookings", fields: [client_id], references: [id])
   rental_time    RentalTime    @relation(fields: [rental_time_id], references: [id])
   start_date     DateTime
+  end_date       DateTime
   how_many       Int
   total_price    Decimal
   status         BookingStatus @default(requested)
