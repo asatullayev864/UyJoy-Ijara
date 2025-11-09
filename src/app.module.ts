@@ -12,6 +12,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { ReportsModule } from './reports/reports.module';
 import { RentalTimesModule } from './rental_times/rental_times.module';
+import { BookingsModule } from './bookings/bookings.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { RentalTimesModule } from './rental_times/rental_times.module';
     FavoritesModule,
     ReviewsModule,
     ReportsModule,
-    RentalTimesModule
+    RentalTimesModule,
+    BookingsModule
   ],
   controllers: [],
   providers: [],

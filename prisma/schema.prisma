@@ -75,12 +75,13 @@ model User {
   is_active     Boolean  @default(true)
   created_at    DateTime @default(now())
 
-  profile   UserProfile[]
-  houses    House[]       @relation("UserHouses")
-  bookings  Booking[]     @relation("UserBookings")
-  favorites Favorite[]
-  reviews   Review[]
-  reports   Report[]      @relation("UserReports")
+  profile      UserProfile[]
+  houses       House[]       @relation("UserHouses")
+  bookings     Booking[]     @relation("UserBookings")
+  favorites    Favorite[]
+  reviews      Review[]
+  reports      Report[]      @relation("UserReports")
+  rental_times RentalTime[]  @relation("UserRentalTimes")
 
   @@map("users")
 }
@@ -153,9 +154,11 @@ model HouseFacility {
 
 model RentalTime {
   id        Int    @id @default(autoincrement())
+  client_id Int
   rent_time String
   price     Int
 
+  client   User      @relation("UserRentalTimes", fields: [client_id], references: [id])
   bookings Booking[]
 
   @@map("rental_times")
