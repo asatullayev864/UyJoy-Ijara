@@ -40,6 +40,10 @@ export class AuthController {
     return this.authService.signUp(createUserDto);
   }
 
+  @Post('confirm-otp')
+  async confirmOTP(@Body() body: { email: string; otp: string }) {
+    return this.authService.confirmOtp(body.email, body.otp);
+  }
 
   @Post('signin')
   @ApiOperation({ summary: 'Foydalanuvchi tizimga kirishi' })

@@ -5,12 +5,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
 import { AccessTokenStrategy, RefreshTokenCookieStrategy } from '../common/strategies';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     JwtModule.register({ global: true }),
     PrismaModule,
     UsersModule,
+    MailModule
   ],
   controllers: [AuthController],
   providers: [AuthService, AccessTokenStrategy, RefreshTokenCookieStrategy],

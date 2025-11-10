@@ -25,5 +25,5 @@ export class CreatePaymentDto {
     })
     @IsOptional()
     @IsEnum(PaymentStatus)
-    status: PaymentStatus = PaymentStatus.pending;
+    status?: PaymentStatus = PaymentStatus.pending;
 }

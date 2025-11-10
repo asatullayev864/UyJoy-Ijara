@@ -7,13 +7,16 @@ import type { Response } from 'express';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from "bcrypt";
 import { Tokens } from '../common/types';
+import { randomInt } from 'crypto';
+import { MailService } from '../mail/mail.service'
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly jwtService: JwtService,
         private readonly prismaService: PrismaService,
-        private readonly userService: UsersService
+        private readonly userService: UsersService,
+        private readonly mailService: MailService,
     ) { }
 
     private async generateTokens(user: any) {
@@ -37,10 +40,49 @@ export class AuthService {
         return { accessToken, refreshToken };
     };
 
+    private generateOTP(): string {
+        return randomInt(100000, 999999).toString();
+    }
+
     async signUp(createUserDto: CreateUserDto) {
-        const newUser = await this.userService.create(createUserDto);
-        return newUser;
+        const otp = this.generateOTP();
+        const otpExpire = new Date(Date.now() + 5 * 60 * 1000);
+
+
+        const newUser = await this.userService.create(createUserDto, otp, otpExpire);
+        await this.mailService.sendOTP(newUser.email, otp);
+
+        return {
+            message: "Ro'yxatdan o'tish muvaffaqiyatli, emailingizga OTP yuborildi ✅",
+            email: newUser.email
+        };
     };
+
+    async confirmOtp(email: string, otp: string) {
+        const user = await this.prismaService.user.findUnique({ where: { email } });
+        if (!user) throw new NotFoundException("Foydalanuvchi topilmadi ❌");
+
+        if (!user.otp || !user.otp_expire || user.otp_expire < new Date()) {
+            throw new BadRequestException('OTP muddati tugagan yoki topilmadi ❌');
+        }
+
+        if (user.otp !== otp) {
+            throw new BadRequestException("OTP noto'g'ri ❌");
+        };
+
+        await this.prismaService.user.update({
+            where: { email },
+            data: {
+                is_active: true,
+                otp: null,
+                otp_expire: null
+            }
+        });
+
+        return {
+            message: "Email tasdiqlandi, endi tizimga kira olasiz ✅"
+        };
+    }
 
     async signIn(signIn: SignInDto, res: Response) {
         const { email, password } = signIn;
@@ -53,6 +95,9 @@ export class AuthService {
         const existsPass = await bcrypt.compare(password, existEmail.password);
         if (!existsPass) throw new NotFoundException("Email yoki parol da hatolik ‼️");
 
+        if (existEmail.is_active != true) {
+            throw new BadRequestException("Siz activ foydalanuvchi emassiz ❗️");
+        }
         const { accessToken, refreshToken } = await this.generateTokens(existEmail);
 
         const hashedRefreshToken = await bcrypt.hash(refreshToken, 7);

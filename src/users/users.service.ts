@@ -44,7 +44,7 @@ export class UsersService implements OnModuleInit {
     }
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, otp: string, otpExpire: any) {
     const { email, password, phone, role } = createUserDto;
     if (role) {
       const existRole = role.toLowerCase();
@@ -63,7 +63,14 @@ export class UsersService implements OnModuleInit {
     if (existPhone) throw new BadRequestException("Bunday tel raqami tarmoqda mavjud ❗️");
 
     createUserDto.password = await bcrypt.hash(password, 7);
-    const newUser = await this.prismaService.user.create({ data: { ...createUserDto } });
+    const newUser = await this.prismaService.user.create({
+      data: {
+        ...createUserDto,
+        is_active: false,
+        otp,
+        otp_expire: otpExpire
+      }
+    });
     return newUser;
   }
 
